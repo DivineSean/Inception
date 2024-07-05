@@ -1,0 +1,156 @@
+# the services part
+services:
+#mariadb
+  mariadb:
+    image: mariadb:user
+    container_name: mariadb
+    build: ./requirements/mariadb
+    volumes:
+      - mariadb:/var/lib/mysql
+    env_file :
+      - .env
+    networks :
+      - inception
+    restart: always
+#nginx
+  nginx:
+    image: nginx:user
+    container_name: nginx
+    build: ./requirements/nginx
+    ports:
+      - "443:443"
+    depends_on:
+      - wordpress
+      - adminer
+    volumes:
+      - wordpress:/var/www/wordpress
+      - adminer:/var/www/html
+      - website:/var/www/html.web
+    env_file:
+      - .env
+    networks:
+      - inception
+    restart: always
+#wordpress
+  wordpress:
+    image: wordpress:user
+    container_name: wordpress
+    build: ./requirements/wordpress
+    depends_on:
+      - mariadb
+    volumes:
+      - wordpress:/var/www/wordpress
+    env_file :
+      - .env
+    networks:
+      - inception
+    restart: always
+#redis
+  redis:
+    image: redis:user
+    container_name: redis
+    build: ./requirements/bonus/redis
+    networks:
+      - inception
+    restart: always
+#FTP
+  ftp:
+    image: ftp:user
+    container_name: ftp
+    ports:
+      - "20:20"
+      - "21:21"
+      - "21100-21110:21100-21110"
+    build: ./requirements/bonus/FtpServer
+    depends_on:
+      - wordpress
+    volumes:
+      - wordpress:/ftp
+    env_file :
+      - .env
+    networks:
+      - inception
+    restart: unless-stopped
+#website
+  website:
+    image: website:user
+    container_name: website
+    build: ./requirements/bonus/website
+    ports:
+      - "4242:80"
+    volumes:
+      - website:/var/www/html/website
+    depends_on:
+      - nginx
+    env_file :
+      - .env
+    networks:
+      - inception
+    restart: always
+#Adminer
+  adminer:
+    build: ./requirements/bonus/Adminer
+    image: adminer:user
+    container_name: adminer
+    networks:
+      - inception
+    restart: always
+    volumes:
+      - adminer:/var/www/html
+    depends_on:
+      - mariadb
+#Portainer
+  portainer:
+    build: ./requirements/bonus/Portainer
+    image: portainer:user
+    container_name: portainer
+    networks:
+      - inception
+    restart: always
+    ports:
+      - "9000:9000"
+    volumes:
+      - portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+# the volumes part
+volumes:
+  mariadb:
+    name: mariadb
+    driver: local
+    driver_opts:
+      device: /home/${LOGIN}/data/mariadb
+      o : bind
+      type : none
+  wordpress:
+    name: wordpress
+    driver: local
+    driver_opts:
+      device: /home/${LOGIN}/data/wordpress
+      o : bind
+      type : none
+  website:
+    name: website
+    driver: local
+    driver_opts:
+      device: /home/${LOGIN}/data/website
+      o: bind
+      type: none
+  adminer:
+    name: adminer
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/${LOGIN}/data/adminer
+      o: bind
+  portainer:
+    name: portainer
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/${LOGIN}/data/portainer
+      o: bind
+# the networks part
+networks:
+  inception:
+    name: inception
+    driver: bridge
