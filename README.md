@@ -49,13 +49,6 @@ $ sudo cp ./docker-compose-linux-x86_64 /usr/bin/docker-compose
   cd ./inception && sudo make
 ```
 
-## Managing the Containers
-- **Portainer:** Access the Portainer UI at `http://localhost:9000`
-- **Adminer:** Manage databases through Adminer at `http://localhost:8080`
-- **WordPress:** The website can be accessed at `http://localhost`
-- **FTP:** Configure an FTP client to connect to `ftp://localhost`
-- **Redis:** Used internally to cache and optimize performance.
-
 ## Conclusion
 This project provides a fully containerized web hosting solution using Docker, suitable for learning, development, and production environments. By integrating essential web technologies and modern DevOps tools, Inception delivers a powerful and flexible framework for web application deployment.
 
